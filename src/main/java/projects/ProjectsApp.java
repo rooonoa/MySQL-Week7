@@ -26,7 +26,9 @@ public class ProjectsApp {
 	 * */
 	//@formatter:off
 	private List<String> operations = List.of (
-			"1) Add a project"
+			"1) Add a project",
+			"2) List projects",
+			"3) Select a Project"
 			);
 	//@formatter:on
 	
@@ -39,7 +41,11 @@ public class ProjectsApp {
 	
 	private ProjectService projectService = new ProjectService();
 	
-	/*creating a new ProjectApp object and call the method processUserSelections()
+	/*Adding an instance variable type Project named curProject
+	 * */
+	private Project curProject;
+	
+	/*creating a new main class ProjectApp object and call the method processUserSelections()
 	 * */
 	public static void main(String[] args) {
 		
@@ -66,6 +72,13 @@ public class ProjectsApp {
 					createProject();
 					break;
 					
+				case 2:
+					listProjects();
+					break;
+					
+				case 3:
+					selectProject();
+					
 				default:
 					System.out.println("\n" + selection +  "  is not valid selection. Try again.");
 					break;
@@ -74,10 +87,42 @@ public class ProjectsApp {
 			}
 		catch (Exception e) {
 			System.out.println("\nError: " + e + ". Try again");
+			e.printStackTrace();
 		}
 		}
 		
 	}
+	
+	/*Method will list project IDs and names so that the user can select a project
+	 * ID. Once the ID is entered, the service is called to return the project details
+	 * */
+	private void selectProject() {
+		listProjects();
+		Integer projectId = getIntInput("Enter a project ID to select a project");
+		
+		/*Unselecting the current project*/
+		curProject = null;
+		
+		/*This part will throw an exception if an invalid project is selected
+		 * */
+		curProject = projectService.fetchProjectById(projectId);
+	}
+
+	/*Creating a variable to hold a list of projects and assigning it to results of a method
+	 * */
+	private void listProjects() {
+		List<Project> projects = projectService.fetchAllProjects();
+		System.out.println("\nProjects:");
+		
+		/*for each project this will print the ID and name separated by " :"
+		 * indenting each line with a couple of spaces 
+		 * */
+		for (Project project:projects) {System.out.
+		println("  " + project.getProjectId() + ": " + project.getProjectName());
+		}	
+		
+	}
+
 	private void createProject() {
 		String projectName = getStringInput("Enter the project name");
 		BigDecimal estimatedHours = getDecimalInput("Enter the estimated hours");
@@ -167,7 +212,17 @@ public class ProjectsApp {
 	/*print all the available menu selections, one on each line using lambda
 	 *  expression
 	 * */
-	operations.forEach(line -> System.out.println(" " + line));
+	for (String line : operations) {
+		System.out.println(" " + line);
+		
+		if (Objects.isNull(curProject)) {System.out.println("\nYou are not working with a project.");
+			
+		}
+		else {
+			System.out.println("\nYou are working with project: " + curProject);
+		}
+	}
+	
 	
 		
 	}
