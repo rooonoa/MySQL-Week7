@@ -1,6 +1,7 @@
 package projects.dao;
 
 import java.math.BigDecimal;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -213,6 +214,100 @@ public class ProjectDao  extends DaoBase {
 		
 	}
 		
+		
+	}
+	
+	/*We will write a SQL statement to Modify the project details.
+	 * The project ID will not be updated as it will be part of the where clause
+	 * We use the question marks as parameters placeholders.
+	 */
+	
+	public boolean modifyProjectDetails(Project project) {
+		// @formatter:off
+		String sql = "" 
+				+ "UPDATE " + PROJECT_TABLE + " SET " 
+				+ "project_name = ?, " 
+				+ "estimated_hours = ?, "
+				+ "actual_hours = ?, " 
+				+ "difficulty = ?, " 
+				+ "notes = ? "
+				+ "WHERE project_id = ?";
+		// @formatter:on
+		
+		/*obtaining a connection and PreparedStatement using appropriate
+		 * try with resource and catch block. Then we will set all the parameters 
+		 * on the preparedStatement. Call executeUpdate() and check if the 
+		 * return value is 1
+		 */
+		
+		try (Connection conn = DbConnection.getConnection()) {
+			startTransaction(conn);
+			
+			try(PreparedStatement stmt = conn.prepareStatement(sql)){
+				setParameter(stmt, 1, project.getProjectName(), String.class);
+				setParameter(stmt, 2, project.getEstimatedHours(), BigDecimal.class);
+				setParameter(stmt, 3, project.getActualHours(), BigDecimal.class);
+				setParameter(stmt, 4, project.getDifficulty(), Integer.class);
+				setParameter(stmt, 5, project.getNotes(), String.class);
+				setParameter(stmt, 6, project.getProjectId(), Integer.class);
+				
+				boolean modified = stmt.executeUpdate() == 1;
+				commitTransaction(conn);
+				
+				return modified;
+				
+			}
+			catch(Exception e) {
+				rollbackTransaction(conn);
+				throw new DbException(e);
+			}
+		}
+		
+	catch (SQLException e) {
+		throw new DbException(e);
+		
+	}
+	
+    /*
+     * writing a SQL DELETE statement and using a place holder for the project 
+     * ID in the WHERE clause. We then Obtain a connection, preparedStatement 
+     * ,start commit and rollback transaction. We also set the project ID parameter 
+     * on the prepared statement and also return true from the menu if executeUpdate() 
+     * returns 1 
+     */
+
+	}
+	public boolean deleteProject(Integer projectId) {
+		String sql = "DELETE FROM " + PROJECT_TABLE + " WHERE project_id = ?";
+		
+		try(Connection conn = DbConnection.getConnection()){
+			startTransaction(conn);
+			
+			try(PreparedStatement stmt = conn.prepareStatement(sql)){
+				
+				setParameter(stmt, 1, projectId, Integer.class);
+				
+				boolean deleted = stmt.executeUpdate() == 1;
+				
+				commitTransaction(conn);
+				
+				return deleted;
+				
+			}
+			
+			catch(Exception e) {
+				rollbackTransaction(conn);
+				throw new DbException (e);
+			}
+			
+		}	
+			
+			
+		catch (SQLException e) {
+			throw new DbException (e);
+			
+			
+		}
 		
 	}
 
